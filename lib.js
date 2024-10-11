@@ -9,5 +9,7 @@ export async function getToken(code) {
   );
   const data = await res.json();
   const accessToken = data.access_token;
+  // TODO build session data
+  // TODO encrypt session data and return
   return accessToken;
 }

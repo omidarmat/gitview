@@ -1,9 +1,13 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
   const cookieStore = cookies();
   const session = cookieStore.get("gitview-session");
+
+  // TODO validate session
+  if (session) redirect("/repos");
 
   return (
     <div>
@@ -17,7 +21,6 @@ export default async function Home() {
           </Link>
         </>
       )}
-      {session && <p>Loading your repos...</p>}
     </div>
   );
 }
