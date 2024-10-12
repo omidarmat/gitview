@@ -36,7 +36,7 @@ export default async function Home() {
     </main>
   );
 
-  const sessionChecked = await checkSession();
-  if (sessionChecked) redirect("/repos");
+  const result = await checkSession();
+  if (result) redirect("/repos");
   return JSX;
 }

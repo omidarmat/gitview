@@ -6,19 +6,14 @@ async function Repos() {
   let repos;
   let userFullname;
 
-  const accessToken = await checkSession();
+  const result = await checkSession();
 
-  if (!accessToken) redirect("/");
-  if (accessToken) {
-    const user = await getUserData(accessToken);
-
-    if (!user) {
-      return <div>BAD CREDENTIALS!</div>;
-    }
-
-    const username = user.username;
-    const fullname = user.fullname;
-
+  if (!result) redirect("/");
+  if (result) {
+    const {
+      accessToken,
+      user: { username, fullname },
+    } = result;
     userFullname = fullname;
 
     repos = await getRepos(accessToken, username);

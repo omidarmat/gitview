@@ -1,8 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { NextResponse } from "next/server";
 import { Octokit } from "octokit";
 
 const key = new TextEncoder().encode(process.env.ENCRYPT_SECRET);
@@ -11,7 +9,7 @@ export async function encrypt(payload) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("10 min from now")
+    .setExpirationTime("10 mins from now")
     .sign(key);
 }
 
@@ -43,8 +41,21 @@ export async function checkSession() {
   // 3. if cookie exists, validate cookie
   if (session) {
     const accessToken = await validateSession();
-    // 3.1. if cookie valid redirect to /repos
-    if (accessToken) return accessToken;
+    if (accessToken) {
+      // 3.1.1 check if token is revoked from GitHub
+      const user = await getUserData(accessToken);
+      // 3.1.2 if not revoked, return token
+      if (user) {
+        const result = {
+          accessToken,
+          user,
+        };
+
+        return result;
+      }
+      // 3.1.3 if revoked
+      if (!user) return false;
+    }
     // 3.2. if cookie invalid delete cookie and render login
     if (!accessToken) {
       return false;
@@ -103,8 +114,7 @@ export async function getRepos(accessToken, username) {
       headers: { accept: "application/vnd.github+json" },
     }
   );
-  console.log("OCTOKIT RESPONSE>>>>>>>>>>>>>");
-  console.log(octokitRes);
+
   return octokitRes.data;
 }
 
