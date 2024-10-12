@@ -1,5 +1,7 @@
 import { checkSession, getRepos, getUsername } from "@/lib";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { Octokit } from "octokit";
 
 async function Repos() {
   let repos;
@@ -9,11 +11,22 @@ async function Repos() {
 
   if (!accessToken) redirect("/");
   if (accessToken) {
+    const octokit = new Octokit({
+      auth: accessToken,
+    });
+
     const { username, fullname } = await getUsername(accessToken);
     userFullname = fullname;
-    console.log(fullname);
-    repos = await getRepos(accessToken, username);
-    console.log(repos);
+    const octokitRes = await octokit.request(
+      `GET /users/{username}/repos?type=all&per_page=2&page=2`,
+      {
+        username,
+        headers: { accept: "application/vnd.github+json" },
+      }
+    );
+    repos = octokitRes.data;
+
+    // repos = await getRepos(accessToken, username);
   }
   return (
     <div>
