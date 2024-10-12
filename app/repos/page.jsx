@@ -1,11 +1,40 @@
-import { checkSession } from "@/lib";
+import { checkSession, getRepos, getUsername } from "@/lib";
 import { redirect } from "next/navigation";
 
 async function Repos() {
-  const sessionChecked = await checkSession();
+  let repos;
+  let userFullname;
 
-  if (sessionChecked) return <div>Loading your repos...</div>;
-  if (!sessionChecked) redirect("/");
+  const accessToken = await checkSession();
+
+  if (!accessToken) redirect("/");
+  if (accessToken) {
+    const { username, fullname } = await getUsername(accessToken);
+    userFullname = fullname;
+    console.log(fullname);
+    repos = await getRepos(accessToken, username);
+    console.log(repos);
+  }
+  return (
+    <div>
+      {!repos && <div>Something went wrong!</div>}
+      {repos && (
+        <div>
+          <p>{userFullname}'s repositories</p>
+          {repos.map((repo) => (
+            <div key={repo.id}>
+              <div>---Repo START---</div>
+              <p>repo name: {repo.name}</p>
+              <p>Last update: {repo.updated_at}</p>
+              <p>owner: {repo.owner.login}</p>
+              <p>download: {repo.downloads_url}</p>
+              <div>---Repo END---</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default Repos;

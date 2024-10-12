@@ -14,7 +14,7 @@ export async function encrypt(payload) {
 export async function decrypt(input) {
   try {
     const { payload } = await jwtVerify(input, key, { algorithms: ["HS256"] });
-    if (payload) return true;
+    if (payload) return payload;
   } catch (err) {
     return false;
   }
@@ -24,8 +24,8 @@ export async function validateSession() {
   const cookieStore = cookies();
   const session = cookieStore.get("gitview-session");
 
-  const sessionIsValid = await decrypt(session.value);
-  return sessionIsValid;
+  const payload = await decrypt(session.value);
+  return payload.accessToken;
 }
 
 export async function checkSession() {
@@ -38,11 +38,11 @@ export async function checkSession() {
   }
   // 3. if cookie exists, validate cookie
   if (session) {
-    const sessionIsValid = await validateSession();
+    const accessToken = await validateSession();
     // 3.1. if cookie valid redirect to /repos
-    if (sessionIsValid) return true;
+    if (accessToken) return accessToken;
     // 3.2. if cookie invalid delete cookie and render login
-    if (!sessionIsValid) {
+    if (!accessToken) {
       return false;
     }
   }
@@ -65,4 +65,36 @@ export async function createSession(code) {
   const encryptedSession = encrypt(session);
 
   return encryptedSession;
+}
+
+export async function getUsername(accessToken) {
+  const resUser = await fetch("https://api.github.com/user", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json",
+    },
+    next: { revalidate: 10 },
+  });
+  const user = await resUser.json();
+  const usernameObj = {
+    username: user.login,
+    fullname: user.name,
+  };
+  return usernameObj;
+}
+
+export async function getRepos(accessToken, username) {
+  const resRepos = await fetch(
+    `https://api.github.com/users/${username}/repos`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json",
+      },
+    }
+  );
+
+  return await resRepos.json();
 }
