@@ -8,7 +8,7 @@ export async function encrypt(payload) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("10 sec from now")
+    .setExpirationTime("10 min from now")
     .sign(key);
 }
 
@@ -91,11 +91,15 @@ export async function getRepos(accessToken, username, perPage, page) {
   });
 
   const octokitRes = await octokit.request(
-    `GET /users/{username}/repos?type=all&per_page=${perPage}&page=${page}`,
+    `GET /users/{username}/repos?type=all`,
     {
       username,
       headers: { accept: "application/vnd.github+json" },
     }
   );
+  console.log("OCTOKIT RESPONSE>>>>>>>>>>>>>");
+  console.log(octokitRes);
   return octokitRes.data;
 }
+
+// GET /users/{username}/repos?type=all&per_page=${perPage}&page=${page}
