@@ -1,4 +1,4 @@
-import { checkSession, getRepos, getUsername } from "@/lib";
+import { checkSession, getRepos, getUserData } from "@/lib";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
@@ -10,16 +10,25 @@ async function Repos() {
 
   if (!accessToken) redirect("/");
   if (accessToken) {
-    const { username, fullname } = await getUsername(accessToken);
+    const user = await getUserData(accessToken);
+
+    if (!user) {
+      return <div>BAD CREDENTIALS!</div>;
+    }
+
+    const username = user.username;
+    const fullname = user.fullname;
+
     userFullname = fullname;
 
-    repos = await getRepos(accessToken, username, 2, 1);
+    repos = await getRepos(accessToken, username);
   }
+
   return (
     <main className="flex flex-col h-[94vh]">
       {!repos && <div>Something went wrong!</div>}
       {repos && (
-        <div className="text-text-normal">
+        <div className="text-text-normal mb-10">
           <div className="mb-5">
             <h2 className="text-text-heading text-lg font-semibold">
               {userFullname}&#39;s repositories
@@ -120,9 +129,8 @@ async function Repos() {
               </button>
             </form>
 
-            <p className="text-sm">
-              Page <span className="text-primary-400 font-bold">2</span> of 4
-            </p>
+            <p className="text-sm">Page 1 of 4</p>
+
             <form action="">
               <button type="submit" className="icon-button">
                 <p>page 3</p>
@@ -145,7 +153,7 @@ async function Repos() {
           </div>
         </div>
       )}
-      <p className="text-center text-xs mt-auto">
+      <p className="text-center text-xs mt-auto pb-8">
         &copy;Copyright 2024 by Omid Armat
       </p>
     </main>

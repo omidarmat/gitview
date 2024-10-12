@@ -1,5 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
+
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { NextResponse } from "next/server";
 import { Octokit } from "octokit";
 
 const key = new TextEncoder().encode(process.env.ENCRYPT_SECRET);
@@ -68,7 +71,7 @@ export async function createSession(code) {
   return encryptedSession;
 }
 
-export async function getUsername(accessToken) {
+export async function getUserData(accessToken) {
   const resUser = await fetch("https://api.github.com/user", {
     method: "GET",
     headers: {
@@ -78,6 +81,9 @@ export async function getUsername(accessToken) {
     next: { revalidate: 10 },
   });
   const user = await resUser.json();
+
+  if (user.status === "401") return;
+
   const usernameObj = {
     username: user.login,
     fullname: user.name,
@@ -85,7 +91,7 @@ export async function getUsername(accessToken) {
   return usernameObj;
 }
 
-export async function getRepos(accessToken, username, perPage, page) {
+export async function getRepos(accessToken, username) {
   const octokit = new Octokit({
     auth: accessToken,
   });
