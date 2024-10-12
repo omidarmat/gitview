@@ -54,7 +54,9 @@ export async function checkSession() {
         return result;
       }
       // 3.1.3 if revoked
-      if (!user) return false;
+      if (!user) {
+        return null;
+      }
     }
     // 3.2. if cookie invalid delete cookie and render login
     if (!accessToken) {
@@ -89,11 +91,11 @@ export async function getUserData(accessToken) {
       Authorization: `Bearer ${accessToken}`,
       Accept: "application/json",
     },
-    next: { revalidate: 10 },
+    next: { revalidate: 0 },
   });
   const user = await resUser.json();
 
-  if (user.status === "401") return;
+  if (user.status === "401") return null;
 
   const usernameObj = {
     username: user.login,
