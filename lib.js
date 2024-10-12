@@ -3,7 +3,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { Octokit } from "octokit";
 
-const key = new TextEncoder().encode(process.env.ENCRYPT_SECRET);
+const key = new TextEncoder().encode(process.env.NEXT_PUBLIC_ENCRYPT_SECRET);
 
 export async function encrypt(payload) {
   return await new SignJWT(payload)
@@ -67,7 +67,7 @@ export async function checkSession() {
 
 export async function createSession(code) {
   const res = await fetch(
-    `https://github.com/login/oauth/access_token?client_id=${process.env.CLIENT_ID}&client_secret=${process.env.CLIENT_SECRET}&code=${code}`,
+    `https://github.com/login/oauth/access_token?client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&client_secret=${process.env.NEXT_PUBLIC_CLIENT_SECRET}&code=${code}`,
     {
       next: { revalidate: 0 },
       method: "POST",

@@ -25,7 +25,7 @@ export default async function Home() {
           Please login to your account
         </p>
         <Link
-          href={`https://github.com/login/oauth/authorize?client_id=${process.env.CLIENT_ID}&state=${process.env.STATE}`}
+          href={`https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&state=${process.env.NEXT_PUBLIC_STATE}`}
           className="bg-primary-700 text-primary-100 px-6 py-2 rounded-lg mb-10 sm:text-lg hover:bg-primary-400 transition-colors duration-300"
         >
           Login with github
