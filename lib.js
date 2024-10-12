@@ -102,7 +102,7 @@ export async function getUserData(accessToken) {
   return usernameObj;
 }
 
-export async function getRepos(accessToken, username) {
+export async function getRepos(accessToken, username, perPage, page) {
   const octokit = new Octokit({
     auth: accessToken,
   });
