@@ -18,22 +18,27 @@ async function removeSession(response) {
 export default async function middlware(request) {
   const code = request.nextUrl.searchParams.get("code");
   const state = request.nextUrl.searchParams.get("state");
-
+  const logout = request.nextUrl.searchParams.get("logout");
+  const response = NextResponse.next();
   if (code && state === process.env.STATE) {
-    const response = NextResponse.next();
     const returnedResponse = await setSession(response, code);
     return returnedResponse;
   }
 
-  if (!code) {
+  if (!code && !logout) {
     const result = await checkSession();
     if (!result) {
-      const response = NextResponse.next();
       const returnedResponse = await removeSession(response);
       return returnedResponse;
     } else {
       return;
     }
+  }
+
+  if (logout === "1") {
+    console.log(">>>>>>>>>>>>>>LOGOUT ACTIVATED");
+    const returnedResponse = await removeSession(response);
+    return returnedResponse;
   }
 }
 
