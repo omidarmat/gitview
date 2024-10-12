@@ -20,7 +20,7 @@ async function Repos({ searchParams }) {
     user: { username, fullname },
   } = result;
 
-  repos = await getRepos(accessToken, username, resultPerPage, currentPage);
+  repos = await getRepos(accessToken, username);
   numPages = Math.floor(repos.length / resultPerPage) + 1;
 
   return (
@@ -158,12 +158,7 @@ async function Repos({ searchParams }) {
                 <form
                   action={async () => {
                     "use server";
-                    await getRepos(
-                      accessToken,
-                      username,
-                      resultPerPage,
-                      +currentPage - 1
-                    );
+                    await getRepos(accessToken, username);
                     redirect(`/repos?p=${+currentPage - 1}`);
                   }}
                 >
@@ -199,12 +194,7 @@ async function Repos({ searchParams }) {
                 <form
                   action={async () => {
                     "use server";
-                    await getRepos(
-                      accessToken,
-                      username,
-                      resultPerPage,
-                      +currentPage + 1
-                    );
+                    await getRepos(accessToken, username);
                     redirect(`/repos?p=${+currentPage + 1}`);
                   }}
                 >
