@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { Octokit } from "octokit";
 
 const key = new TextEncoder().encode(process.env.ENCRYPT_SECRET);
 
@@ -84,17 +85,17 @@ export async function getUsername(accessToken) {
   return usernameObj;
 }
 
-export async function getRepos(accessToken, username) {
-  const resRepos = await fetch(
-    `https://api.github.com/users/${username}/repos`,
+export async function getRepos(accessToken, username, perPage, page) {
+  const octokit = new Octokit({
+    auth: accessToken,
+  });
+
+  const octokitRes = await octokit.request(
+    `GET /users/{username}/repos?type=all&per_page=${perPage}&page=${page}`,
     {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/json",
-      },
+      username,
+      headers: { accept: "application/vnd.github+json" },
     }
   );
-
-  return await resRepos.json();
+  return octokitRes.data;
 }
